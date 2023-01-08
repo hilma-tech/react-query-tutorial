@@ -2,7 +2,7 @@ import { Todo } from "../ServerTypes";
 import { createContext, ReactNode, useContext } from "react";
 
 export type TodosContextData = {
-    todos: Array<Todo>;
+    todos: Array<Todo> | undefined;
     isLoadingTodos: boolean;
     isLoadingTodosError: boolean;
     updateTodo(id: number, completed: boolean): Promise<void>;
