@@ -1,5 +1,5 @@
 import { Todo } from "../ServerTypes";
-import axios from "axios/index";
+import axios from "axios";
 
 export async function fetchAllTodos(): Promise<Todo[]> {
     const { data } = await axios.get('/api/todos');
