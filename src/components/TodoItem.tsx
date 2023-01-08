@@ -1,28 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import clsx from "clsx";
 import { Todo } from '../ServerTypes';
 
-import { useTodosContext } from "../contexts/TodosContext";
+import { useUpdateTodoMutation } from "../hooks/useTodosHooks";
 
 import Styles from './TodoItem.module.css';
 
 type TodoItemProps = Todo;
 
 function TodoItem(props: TodoItemProps) {
-    const { updateTodo } = useTodosContext();
-    const [isUpdating, setIsUpdating] = useState(false);
+    const updateTodoMutation = useUpdateTodoMutation();
+
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { checked } = event.target;
-        setIsUpdating(true);
-        updateTodo(props.id, checked).then(() => setIsUpdating(false));
+        updateTodoMutation.mutate(
+            { id: props.id, completed: checked },
+        );
     }
 
     return (
-        <div className={clsx(Styles.todo, isUpdating && Styles.updating)}>
+        <div className={clsx(Styles.todo, updateTodoMutation.isLoading && Styles.updating)}>
             <input
                 type="checkbox"
                 checked={props.completed}
-                disabled={isUpdating}
+                disabled={updateTodoMutation.isLoading}
                 onChange={handleCheckboxChange}
             />
 

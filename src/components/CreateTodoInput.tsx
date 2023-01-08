@@ -1,22 +1,21 @@
-import { KeyboardEvent, useRef, useState } from "react";
-import { useTodosContext } from "../contexts/TodosContext";
+import { KeyboardEvent, useRef } from "react";
+import { useCreateTodoMutation } from "../hooks/useTodosHooks";
 
 export function CreateTodoInput() {
     const inputRef = useRef<HTMLInputElement>(null);
-    const [isCreating, setIsCreating] = useState(false);
-    const { createTodo } = useTodosContext();
+    const createTodoMutation = useCreateTodoMutation();
 
     const handleSubmitTodo = async () => {
         const content = inputRef.current?.value;
         if (!content) return;
-        try {
-            setIsCreating(true);
-            await createTodo(content);
-            inputRef.current!.value = '';
-        }
-        finally {
-            setIsCreating(false);
-        }
+        await createTodoMutation.mutateAsync(
+            content,
+            {
+                onSuccess: () => {
+                    inputRef.current!.value = '';
+                }
+            }
+        );
     }
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key !== 'Enter') return; // only submit on enter
@@ -24,5 +23,5 @@ export function CreateTodoInput() {
         handleSubmitTodo();
     }
 
-    return <input ref={inputRef} disabled={isCreating} onKeyDown={handleKeyDown} />
+    return <input ref={inputRef} disabled={createTodoMutation.isLoading} onKeyDown={handleKeyDown} />
 }
