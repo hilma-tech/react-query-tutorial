@@ -1,5 +1,7 @@
 import { Todo } from "../ServerTypes";
 import { createContext, ReactNode, useContext } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export type TodosContextData = {
     todos: Array<Todo> | undefined;
@@ -13,17 +15,27 @@ export type TodosContextData = {
 const TodosContext = createContext<TodosContextData>(null!);
 
 export function TodosContextProvider({ children }: { children: ReactNode }) {
-    // TODO: implement here 3 things: a query to list todos, a mutation to update a todo, and a mutation to create a todo
-    // TODO: from the query, extract those values: isLoading, isError, data (extract it as todos)
+    const { isLoading, isError, data: todos } = useQuery(['todos', 'list'], () => {
+        return axios.get('/api/todos').then(res => res.data);
+    });
+    const updateTodoMutation = useMutation((todo: { id: number, completed: boolean }) => {
+        return axios.put(`/api/todos/${todo.id}`, { completed: todo.completed }).then(res => res.data);
+    });
+    const createTodoMutation = useMutation((content: string) => {
+        return axios.post('/api/todos', { content }).then(res => res.data);
+    });
+
     const updateTodo = async (todo: Todo | number, completed: boolean) => {
         if (typeof todo !== 'number') todo = todo.id;
 
-        // TODO: implement the logic to update a todo using React Query's useMutation hook
+        const newTodo = {
+            id: todo,
+            completed,
+        };
+        await updateTodoMutation.mutateAsync(newTodo);
     }
     const createTodo = async (content: string) => {
-        // TODO: implement the logic to create a todo using React Query's useMutation hook
-        // TODO: this function should return the newly created todo
-        return undefined!;
+        return await createTodoMutation.mutateAsync(content);
     }
 
     return (
@@ -44,51 +56,3 @@ export function TodosContextProvider({ children }: { children: ReactNode }) {
 export function useTodosContext() {
     return useContext(TodosContext);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// noinspection ES6ConvertVarToLetConst
-var todos: any = undefined;
-// noinspection ES6ConvertVarToLetConst
-var isLoading: any = undefined;
-// noinspection ES6ConvertVarToLetConst
-var isError: any = undefined;
