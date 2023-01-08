@@ -1,7 +1,6 @@
 import { Todo } from "../ServerTypes";
 import { createContext, ReactNode, useContext } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useCreateTodoMutation, useTodosQuery, useUpdateTodoMutation } from "../hooks/useTodosHooks";
 
 export type TodosContextData = {
     todos: Array<Todo> | undefined;
@@ -15,15 +14,9 @@ export type TodosContextData = {
 const TodosContext = createContext<TodosContextData>(null!);
 
 export function TodosContextProvider({ children }: { children: ReactNode }) {
-    const { isLoading, isError, data: todos } = useQuery(['todos', 'list'], () => {
-        return axios.get('/api/todos').then(res => res.data);
-    });
-    const updateTodoMutation = useMutation((todo: { id: number, completed: boolean }) => {
-        return axios.put(`/api/todos/${todo.id}`, { completed: todo.completed }).then(res => res.data);
-    });
-    const createTodoMutation = useMutation((content: string) => {
-        return axios.post('/api/todos', { content }).then(res => res.data);
-    });
+    const { isLoading, isError, data: todos } = useTodosQuery();
+    const updateTodoMutation = useUpdateTodoMutation();
+    const createTodoMutation = useCreateTodoMutation();
 
     const updateTodo = async (todo: Todo | number, completed: boolean) => {
         if (typeof todo !== 'number') todo = todo.id;
